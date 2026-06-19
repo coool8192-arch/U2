@@ -21,17 +21,22 @@ public class PlayFabManager : MonoBehaviourPunCallbacks
     public void Success(LoginResult loginResult)
     {
         PlayFabClientAPI.GetAccountInfo(new GetAccountInfoRequest(), Success, Failed);
-    }
-
-    public void Success(GetAccountInfoResult getAccountInfoResult)
-    {
-        PhotonNetwork.LocalPlayer.NickName = getAccountInfoResult.AccountInfo?.Username;
 
         PhotonNetwork.AutomaticallySyncScene = false;
 
         PhotonNetwork.GameVersion = version;
 
-        StartCoroutine(ConnectRoutine());
+        PhotonNetwork.ConnectUsingSettings();
+    }
+
+    public void Open()
+    {
+        PanelManager.Instance.Open(Panel.Subscribe);
+    }
+
+    public void Success(GetAccountInfoResult getAccountInfoResult)
+    {
+        PhotonNetwork.LocalPlayer.NickName = getAccountInfoResult.AccountInfo?.Username;
     }
 
     public void Failed(PlayFabError playFabError)
@@ -39,15 +44,8 @@ public class PlayFabManager : MonoBehaviourPunCallbacks
         Debug.Log(playFabError.GenerateErrorReport());
     }
 
-    private IEnumerator ConnectRoutine()
+    public override void OnConnectedToMaster()
     {
-        PhotonNetwork.ConnectUsingSettings();
-
-        while (PhotonNetwork.IsConnectedAndReady == false) 
-        {
-            yield return null;
-        }
-
         PhotonNetwork.JoinLobby();
     }
 
