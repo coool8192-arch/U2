@@ -1,10 +1,17 @@
 using Photon.Pun;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Character : MonoBehaviourPun
 {
     [SerializeField] Vector3 direction;
+    [SerializeField] float speed;
+    [SerializeField] Rotation rotation;
+    [SerializeField] Rigidbody rigidbody;
+
+    private void Awake()
+    {
+        rigidbody = GetComponent<Rigidbody>();
+    }
 
     void Start()
     {
@@ -13,12 +20,28 @@ public class Character : MonoBehaviourPun
 
     void Update()
     {
-
+        if (photonView.IsMine)
+        {
+            Control();
+        }
     }
 
     void FixedUpdate()
     {
+        if (photonView.IsMine)
+        {
+            Move();
 
+            rotation.RotateY(rigidbody);
+        }
+    }
+
+    void Control()
+    {
+        direction.x = Input.GetAxisRaw("Horizontal");
+        direction.z = Input.GetAxisRaw("Vertical");
+
+        direction.Normalize();
     }
 
     void DisableCamera()
@@ -37,15 +60,8 @@ public class Character : MonoBehaviourPun
         }
     }
 
-    void Control()
-    {
-
-    }
-
     void Move()
     {
-
-
-       // rigidbody.MovePosition();
+        rigidbody.MovePosition(rigidbody.position + rigidbody.transform.TransformDirection(direction) * speed);
     }
 }
